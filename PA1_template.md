@@ -14,10 +14,24 @@ In this assignment the personal movement data of an individual recorded over a p
 
 Loading the movement data from file
 
-```{r, echo = TRUE}
+
+```r
 activityData <- read.csv("activity.csv", stringsAsFactors=FALSE)
 summary(activityData)
+```
 
+```
+##      steps            date              interval     
+##  Min.   :  0.00   Length:17568       Min.   :   0.0  
+##  1st Qu.:  0.00   Class :character   1st Qu.: 588.8  
+##  Median :  0.00   Mode  :character   Median :1177.5  
+##  Mean   : 37.38                      Mean   :1177.5  
+##  3rd Qu.: 12.00                      3rd Qu.:1766.2  
+##  Max.   :806.00                      Max.   :2355.0  
+##  NA's   :2304
+```
+
+```r
 # Transforming dates into a valid date-class
 actDate <- strptime(activityData$date, "%Y-%m-%d")
 activityData$date <- actDate
@@ -30,7 +44,8 @@ activityData$date <- actDate
 
 Calculating the mean total number of steps taken per day and presenting them as a histogram.
 
-```{r, echo = TRUE}
+
+```r
 numDays <- length(activityData$steps) / 288
 stepsPerDay <- vector("numeric")
 for (i in 1:numDays) {
@@ -43,14 +58,18 @@ for (i in 1:numDays) {
 }
 
 hist(stepsPerDay, breaks = 20, main = "Number of Steps per Day", xlab = "Steps per Day")
+```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
+```r
 meanStepsPerDay <- format(mean(stepsPerDay), digits = 6)
 medianStepsPerDay <- format(median(stepsPerDay), digits = 6)
 ```
 
 
-The mean of steps per day is `r meanStepsPerDay` .   
-The median of steps per day is `r medianStepsPerDay` .  
+The mean of steps per day is 10766.2 .   
+The median of steps per day is 10765 .  
 
 
 
@@ -58,31 +77,42 @@ The median of steps per day is `r medianStepsPerDay` .
 
 
 Constructing a time series plot of the 5-minute interval and the average number of steps taken, which are averaged across all days.
-```{r, echo = TRUE}
+
+```r
 avgSteps <- aggregate(activityData$steps ~ activityData$interval, activityData, mean)
 colnames(avgSteps)[1:2] = c("interval","steps")
 plot(x = avgSteps$interval, y = avgSteps$steps, type="l", xlab = "5-minute interval", ylab = "Average number of steps taken", main = "Time series of the 5-minute interval and the average num of steps taken")
+```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+```r
 # 5-minute interval with highest number of steps on average
 avgSteps[avgSteps$steps == max(avgSteps$steps), 1]
 ```
 
-The 5-minute interval with the highest number of steps on average is `r avgSteps[avgSteps$steps == max(avgSteps$steps), 1]`.
+```
+## [1] 835
+```
+
+The 5-minute interval with the highest number of steps on average is 835.
 
 
 
 ##Imputing missing values
 
 
-```{r, echo = TRUE}
+
+```r
 numNAValues <- length(activityData$steps[is.na(activityData$steps)])
 ```
 
-The total number of NA values in the data set is `r numNAValues`.
+The total number of NA values in the data set is 2304.
 
 The Replacement Strategy chosen is to replace the NA values with the average total steps per 5-minute interval.
 
-```{r, echo = TRUE}
+
+```r
 cleanedActivityData <- activityData
 for (i in 1:length(cleanedActivityData$steps)) {
     if (is.na(cleanedActivityData$steps[i])) {
@@ -95,7 +125,8 @@ for (i in 1:length(cleanedActivityData$steps)) {
 
 Calculating the mean total number of steps taken per day without NA values.
 
-```{r, echo = TRUE}
+
+```r
 numDays <- length(cleanedActivityData$steps) / 288
 stepsnoNAPerDay <- vector("numeric")
 for (i in 1:numDays) {
@@ -106,14 +137,18 @@ for (i in 1:numDays) {
     stepsnoNAPerDay <- c(stepsnoNAPerDay, numStepsnoNA)
 }
 hist(stepsnoNAPerDay, breaks = 20, main = "Number of Steps per Day with replaced NA values", xlab = "Steps per Day")
+```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+
+```r
 meannoNAStepsPerDay <- format(mean(stepsnoNAPerDay), digits = 6)
 mediannoNAStepsPerDay <- format(median(stepsnoNAPerDay), digits = 6)
 ```
 
 
-The mean of steps per day is now `r meannoNAStepsPerDay` .   
-The median of steps per day is now `r mediannoNAStepsPerDay` .
+The mean of steps per day is now 10766.2 .   
+The median of steps per day is now 10766.2 .
 
 With the replacement of the NA values we have artificially increased the total number of observations in our data. Of course all of those new values match the central bar in the histogram which includes the mean. Mean and median have thus become the same.
 
@@ -124,8 +159,8 @@ With the replacement of the NA values we have artificially increased the total n
 
 The data is split into two datasets: one for weekdays and one for weekends according to a factor variable with the levels "weekday" and "weekend"
 
-```{r cache=TRUE}
 
+```r
 weekDays <- actDate$wday
 isWeekDay <- vector("numeric", length = length(cleanedActivityData$steps))
 
@@ -143,7 +178,8 @@ activityDataWeekEnds <- cleanedActivityData[cleanedActivityData$weekDays == "Wee
 
 The two datasets for weekdays and weekends are plotted as two seperate time series.
 
-```{r cache=TRUE, fig.width=11, fig.height=12}
+
+```r
 par(mfrow=c(2,1))
 
 avgStepsWeekDays <- aggregate(activityDataWeekDays$steps ~ activityDataWeekDays$interval, activityDataWeekDays, mean)
@@ -154,3 +190,5 @@ avgStepsWeekEnds <- aggregate(activityDataWeekEnds$steps ~ activityDataWeekEnds$
 colnames(avgStepsWeekEnds)[1:2] = c("interval","steps")
 plot(x = avgStepsWeekEnds$interval, y = avgStepsWeekEnds$steps, type="l", xlab = "5-minute interval", ylab = "Average number of steps taken", main = "Time series of the 5-minute interval across all weekend days")
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
